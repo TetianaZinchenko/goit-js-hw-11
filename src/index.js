@@ -18,6 +18,7 @@ const simpleligthbox = new SimpleLightbox('.gallery a', { loop: false });
 const perPage = 40;
 let page = 1;
 let observer = null;
+// let searchQuery = '';
 const options = {
   root: null,
   rootMargin: '600px',
@@ -35,6 +36,11 @@ function onSearch(e) {
   page = 1;
 
   const searchQuery = e.target.elements.searchQuery.value.trim();
+
+  if (!searchQuery) {
+    return alertWrongQuery();
+  }
+
   observer = new IntersectionObserver(onLoad, options);
   observer.observe(refs.guard);
 
@@ -43,9 +49,6 @@ function onSearch(e) {
       if (entry.isIntersecting) {
         picturesApi(searchQuery, page, perPage)
           .then(resp => {
-            if (resp.data.hits.length < 1) {
-              throw new Error();
-            }
             addMoreImages(resp.data.hits);
             if (page > 1) {
               smoothScroll();
@@ -146,6 +149,10 @@ function notifyFailure() {
   Notify.failure(
     'Sorry, there are no images matching your search query. Please try again.'
   );
+}
+
+function alertWrongQuery() {
+  Notify.failure('Sorry, there is no information for the search.');
 }
 
 function notifyInfo() {
